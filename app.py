@@ -5,7 +5,7 @@ import numpy as np
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
-model = tf.keras.models.load_model('render-mini/model/rck.keras')
+model = tf.keras.models.load_model('rck.keras')
 
 # List of classes
 classes = ["COPD", "Bronchiolitis", "Pneumonia", "URTI", "Healthy"]
