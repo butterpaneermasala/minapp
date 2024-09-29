@@ -11,17 +11,21 @@ model = tf.keras.models.load_model('rck.keras')
 classes = ["COPD", "Bronchiolitis", "Pneumonia", "URTI", "Healthy"]
 
 @app.route('/predict', methods=['POST'])
-@app.route('/predict', methods=['POST'])
 def predict():
     if 'file' not in request.files:
         return jsonify({'error': 'No file uploaded'}), 400
 
     file = request.files['file']
+    
+    # Check if the file is a .wav file
+    if not file.filename.endswith('.wav'):
+        return jsonify({'error': 'Invalid file type. Only .wav files are accepted.'}), 400
+
     file_path = os.path.join('/tmp', file.filename)
     file.save(file_path)
 
     # Load the audio file and extract features
-    data_x, sampling_rate = librosa.load(file_path, res_type='kaiser_fast')
+    data_x, sampling_rate = librosa.load(file_path, sr=None, res_type='kaiser_fast')  # Set sr=None to preserve original sampling rate
     mfccs = np.mean(librosa.feature.mfcc(y=data_x, sr=sampling_rate, n_mfcc=52).T, axis=0)
 
     # Expand dimensions to match expected input shape
@@ -33,7 +37,6 @@ def predict():
     predicted_class = classes[np.argmax(prediction)]
 
     return jsonify({'predicted_class': predicted_class})
-
 
 if __name__ == '__main__':
     app.run(debug=True)
